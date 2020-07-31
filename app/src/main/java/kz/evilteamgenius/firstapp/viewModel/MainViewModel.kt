@@ -11,7 +11,7 @@ import kz.evilteamgenius.firstapp.utils.DBUtil
 import kz.evilteamgenius.firstapp.utils.loadData
 
 class MainViewModel : ViewModel() {
-    // I'm too lazy to seperate the methods but is is possible )))
+    // I'm too lazy to separate the methods but is is possible )))
     val allCurrency = MutableLiveData<List<Currency>>()
     var allCurrencyDB = MutableLiveData<List<CurrencyDB>>()
     val mainCurrencyData = MutableLiveData<List<Currency>>()
@@ -47,9 +47,9 @@ class MainViewModel : ViewModel() {
 
     private fun changeValue() = viewModelScope.launch {
 
-        db.getDB().userDao().deleteAll()
+        db.getCurrencyDb().deleteAll()
         allCurrency.value?.forEach {
-            db.getDB().userDao().insertAll(initCurrency(it))
+            db.getCurrencyDb().insertAll(initCurrency(it))
         }
         val allCur = ArrayList<Currency>()
         val mainCur = ArrayList<Currency>()
@@ -60,7 +60,7 @@ class MainViewModel : ViewModel() {
             }
         }
         kotlin.run {
-            allCurrencyDB.value = db.getDB().userDao().getAll().value
+            allCurrencyDB.value = db.getCurrencyDb().getAll().value
             allCurrency.postValue(allCur)
             mainCurrencyData.postValue(mainCur)
         }

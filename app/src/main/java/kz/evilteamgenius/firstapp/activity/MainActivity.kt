@@ -1,6 +1,8 @@
 package kz.evilteamgenius.firstapp.activity
 
 
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -10,20 +12,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kz.evilteamgenius.firstapp.R
+import kz.evilteamgenius.firstapp.utils.NetworkReceiver
 import kz.evilteamgenius.firstapp.utils.enablePolicy
 import kz.evilteamgenius.firstapp.viewModel.MainViewModel
 
 
 class MainActivity : FragmentActivity()
-    , AmbientModeSupport.AmbientCallbackProvider {
+    , AmbientModeSupport.AmbientCallbackProvider
+    , NetworkReceiver.ConnectivityReceiverListener {
     private lateinit var ambientController: AmbientModeSupport.AmbientController
     private lateinit var viewModel: MainViewModel
+
+    // The BroadcastReceiver that tracks network connectivity changes.
+    private lateinit var receiver: NetworkReceiver
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ambientController = AmbientModeSupport.attach(this)
         enablePolicy()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        registerReceiver(NetworkReceiver(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         CoroutineScope(IO).launch {
             viewModel.loadAllData()
         }
@@ -59,5 +67,14 @@ class MainActivity : FragmentActivity()
             // Update the content
             var kjsfh = navController.currentDestination
         }
+    }
+
+    override fun onNetworkConnectionChanged(isConnected: Boolean) {
+        viewModel.isInternetActive.value = isConnected
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        NetworkReceiver.connectivityReceiverListener = this
     }
 }
