@@ -34,7 +34,7 @@ class MainViewModel : ViewModel() {
     private suspend fun loadDataSomeTime() = viewModelScope.launch {
         try {
             // seconds * milliseconds like 35 * 1 (000)
-            val delayTime: Long = 35 * 1000
+            val delayTime: Long = 200 * 1000
             while (isInternetActive.value!!) {
                 delay(delayTime)
                 allCurrency.value = loadData()
