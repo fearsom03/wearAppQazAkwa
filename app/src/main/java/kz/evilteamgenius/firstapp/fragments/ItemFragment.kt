@@ -1,9 +1,7 @@
 package kz.evilteamgenius.firstapp.fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,16 +15,13 @@ import kz.evilteamgenius.firstapp.viewModel.MainViewModel
 /**
  * A fragment representing a list of Items.
  */
-class ItemFragment : Fragment() {
+class ItemFragment : Fragment(R.layout.fragment_item_list) {
 
     private var columnCount = 1
     private lateinit var viewModel: MainViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_item_list, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
         // Set the adapter
         if (view is RecyclerView) {
@@ -38,9 +33,7 @@ class ItemFragment : Fragment() {
                 viewModel.allCurrency.observe(viewLifecycleOwner, Observer {
                     adapter = MyCurrencyRecyclerViewAdapter(it)
                 })
-
             }
         }
-        return view
     }
 }

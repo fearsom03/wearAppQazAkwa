@@ -4,6 +4,7 @@ package kz.evilteamgenius.firstapp.activity
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -31,7 +32,8 @@ class MainActivity : FragmentActivity()
         ambientController = AmbientModeSupport.attach(this)
         enablePolicy()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        registerReceiver(NetworkReceiver(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        receiver = NetworkReceiver()
+        registerReceiver(receiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         CoroutineScope(IO).launch {
             viewModel.loadAllData()
         }
@@ -41,7 +43,7 @@ class MainActivity : FragmentActivity()
 
     inner class MyAmbientCallback : AmbientModeSupport.AmbientCallback() {
 
-        var navController = findNavController(R.id.fragments)
+        private var navController = findNavController(R.id.fragments)
 
         override fun onEnterAmbient(ambientDetails: Bundle?) {
             // Handle entering ambient mode
@@ -65,7 +67,8 @@ class MainActivity : FragmentActivity()
 
         override fun onUpdateAmbient() {
             // Update the content
-            var kjsfh = navController.currentDestination
+            val navDestination = navController.currentDestination
+            Log.d("activity", "onUpdateAmbient: ${navDestination.toString()}")
         }
     }
 
@@ -76,5 +79,10 @@ class MainActivity : FragmentActivity()
     override fun onPostResume() {
         super.onPostResume()
         NetworkReceiver.connectivityReceiverListener = this
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(receiver)
     }
 }
