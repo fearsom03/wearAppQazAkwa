@@ -6,6 +6,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.wear.ambient.AmbientModeSupport
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import kz.evilteamgenius.firstapp.R
 import kz.evilteamgenius.firstapp.utils.enablePolicy
 import kz.evilteamgenius.firstapp.viewModel.MainViewModel
@@ -21,7 +24,9 @@ class MainActivity : FragmentActivity()
         ambientController = AmbientModeSupport.attach(this)
         enablePolicy()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        viewModel.loadAllData()
+        CoroutineScope(IO).launch {
+            viewModel.loadAllData()
+        }
     }
 
     override fun getAmbientCallback(): AmbientModeSupport.AmbientCallback = MyAmbientCallback()

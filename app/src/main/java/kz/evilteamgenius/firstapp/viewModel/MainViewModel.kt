@@ -1,62 +1,69 @@
 package kz.evilteamgenius.firstapp.viewModel
 
-import android.os.AsyncTask
-import android.os.Handler
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kz.evilteamgenius.firstapp.database.CurrencyDB
 import kz.evilteamgenius.firstapp.models.Currency
 import kz.evilteamgenius.firstapp.utils.DBUtil
 import kz.evilteamgenius.firstapp.utils.loadData
 
 class MainViewModel : ViewModel() {
+    // I'm too lazy to seperate the methods but is is possible )))
     val allCurrency = MutableLiveData<List<Currency>>()
-    val allCurrencyDB = MutableLiveData<List<CurrencyDB>>()
+    var allCurrencyDB = MutableLiveData<List<CurrencyDB>>()
     val mainCurrencyData = MutableLiveData<List<Currency>>()
     val db = DBUtil()
+    val isInternetActive = MutableLiveData<Boolean>()
 
-    fun loadAllData() {
-        allCurrency.value = loadData()
-        changeValue()
-        val handler = Handler()
-        val delay = 30 * 1000 //milliseconds
+    init {
+        isInternetActive.value = true
+    }
+
+    suspend fun loadAllData() = viewModelScope.launch {
+        if (isInternetActive.value!!) {
+            allCurrency.value = loadData()
+            changeValue()
+            loadDataSomeTime()
+        }
+    }
+
+
+    private suspend fun loadDataSomeTime() = viewModelScope.launch {
         try {
-            handler.postDelayed(object : Runnable {
-                override fun run() {
-                    //do something
-                    allCurrency.value = loadData()
-                    changeValue()
-                    handler.postDelayed(this, delay.toLong())
-                }
-            }, delay.toLong())
+            // seconds * milliseconds like 35 * 1 (000)
+            val delayTime: Long = 35 * 1000
+            while (isInternetActive.value!!) {
+                delay(delayTime)
+                allCurrency.value = loadData()
+                changeValue()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun changeValue() {
-        val a = AsyncTask.execute {
-            db.getDB().userDao().deleteAll()
-            allCurrency.value?.forEach {
-                db.getDB().userDao().insertAll(initCurrency(it))
-            }
+    private fun changeValue() = viewModelScope.launch {
 
-            val allCur = ArrayList<Currency>()
-            val mainCur = ArrayList<Currency>()
-            allCurrency.value?.forEach {
-                allCur.add(it)
-                if (checkForMain(it)) {
-                    mainCur.add(it)
-                }
-            }
-            kotlin.run {
-                allCurrencyDB.postValue(db.getDB().userDao().getAll())
-                allCurrency.postValue(allCur)
-                mainCurrencyData.postValue(mainCur)
+        db.getDB().userDao().deleteAll()
+        allCurrency.value?.forEach {
+            db.getDB().userDao().insertAll(initCurrency(it))
+        }
+        val allCur = ArrayList<Currency>()
+        val mainCur = ArrayList<Currency>()
+        allCurrency.value?.forEach {
+            allCur.add(it)
+            if (checkForMain(it)) {
+                mainCur.add(it)
             }
         }
-
-
+        kotlin.run {
+            allCurrencyDB.value = db.getDB().userDao().getAll().value
+            allCurrency.postValue(allCur)
+            mainCurrencyData.postValue(mainCur)
+        }
     }
 
     private fun checkForMain(currency: Currency): Boolean {

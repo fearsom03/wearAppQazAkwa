@@ -15,7 +15,7 @@ class MyCurrencyRecyclerViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_item, parent, false)
+            .inflate(R.layout.item_currency, parent, false)
         return ViewHolder(view)
     }
 
