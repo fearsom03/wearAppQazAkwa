@@ -9,6 +9,7 @@ import kz.evilteamgenius.firstapp.database.CurrencyDB
 import kz.evilteamgenius.firstapp.models.Currency
 import kz.evilteamgenius.firstapp.utils.DBUtil
 import kz.evilteamgenius.firstapp.utils.loadData
+import timber.log.Timber
 
 class MainViewModel : ViewModel() {
     // I'm too lazy to separate the methods but is is possible )))
@@ -22,30 +23,45 @@ class MainViewModel : ViewModel() {
         isInternetActive.value = true
     }
 
-    suspend fun loadAllData() = viewModelScope.launch {
-        if (isInternetActive.value!!) {
-            allCurrency.value = loadData()
-            changeValue()
-            loadDataSomeTime()
+    suspend fun loadAllData() {
+        kotlin.run {
+            if (isInternetActive.value!!) {
+                val a = loadData()
+                if (a.isNotEmpty()) {
+                    allCurrency.postValue(a)
+                    changeValue()
+                }
+                loadDataSomeTime()
+            }
         }
+
     }
 
 
-    private suspend fun loadDataSomeTime() = viewModelScope.launch {
+    private suspend fun loadDataSomeTime() {
         try {
+            val second: Long = 1000
             // seconds * milliseconds like 35 * 1 (000)
-            val delayTime: Long = 200 * 1000
+            val delayTime: Long = 500 * second
             while (isInternetActive.value!!) {
                 delay(delayTime)
-                allCurrency.value = loadData()
-                changeValue()
+                val a = loadData()
+                if (a.isNotEmpty()) {
+                    allCurrency.value = a
+                    changeValue()
+                } else {
+                    isInternetActive.value = false
+                    getOffileData()
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            isInternetActive.value = false
+            getOffileData()
         }
     }
 
-    private fun changeValue() = viewModelScope.launch {
+    private suspend fun changeValue() = viewModelScope.launch {
 
         db.getCurrencyDb().deleteAll()
         allCurrency.value?.forEach {
@@ -59,11 +75,26 @@ class MainViewModel : ViewModel() {
                 mainCur.add(it)
             }
         }
-        kotlin.run {
-            allCurrencyDB.value = db.getCurrencyDb().getAll().value
-            allCurrency.postValue(allCur)
-            mainCurrencyData.postValue(mainCur)
+        Timber.d("allcur kuka ->$allCur")
+        allCurrencyDB.value = db.getCurrencyDb().getAll()
+        allCurrency.value = (allCur)
+        mainCurrencyData.value = (mainCur)
+    }
+
+    suspend fun getOffileData() = viewModelScope.launch {
+        val allCur = ArrayList<Currency>()
+        val mainCur = ArrayList<Currency>()
+        allCurrencyDB.value = db.getCurrencyDb().getAll()
+
+        allCurrencyDB.value?.forEach { cur ->
+            val it = initCurrency(cur)
+            allCur.add(it)
+            if (checkForMain(it)) {
+                mainCur.add(it)
+            }
         }
+        allCurrency.value = (allCur)
+        mainCurrencyData.value = (mainCur)
     }
 
     private fun checkForMain(currency: Currency): Boolean {
@@ -75,7 +106,7 @@ class MainViewModel : ViewModel() {
         return false
     }
 
-    private fun initCurrency(currencyDB: CurrencyDB): Currency {
+    fun initCurrency(currencyDB: CurrencyDB): Currency {
         val currency = Currency()
         currencyDB.change?.let { currency.change = it }
         currencyDB.description?.let { currency.description = it }
@@ -85,7 +116,7 @@ class MainViewModel : ViewModel() {
         return currency
     }
 
-    private fun initCurrency(currencyDB: Currency): CurrencyDB {
+    fun initCurrency(currencyDB: Currency): CurrencyDB {
         return CurrencyDB(
             change = currencyDB.change,
             title = currencyDB.title,

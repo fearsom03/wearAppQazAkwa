@@ -3,12 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/AppTheme"
     tools:context=".fragments.BlankFragment">
 
     <TextView
         android:id="@+id/someText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="@color/mainTextColor"
         android:text="@string/hello_blank_fragment" />
 
 </LinearLayout>

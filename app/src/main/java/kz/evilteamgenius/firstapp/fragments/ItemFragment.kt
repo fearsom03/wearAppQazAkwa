@@ -2,12 +2,12 @@ package kz.evilteamgenius.firstapp.fragments
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import kz.evilteamgenius.firstapp.R
 import kz.evilteamgenius.firstapp.adapter.MyCurrencyRecyclerViewAdapter
 import kz.evilteamgenius.firstapp.viewModel.MainViewModel
@@ -15,7 +15,7 @@ import kz.evilteamgenius.firstapp.viewModel.MainViewModel
 /**
  * A fragment representing a list of Items.
  */
-class ItemFragment : Fragment(R.layout.fragment_item_list) {
+class ItemFragment(val type: Int = 0) : BaseFragment(R.layout.fragment_item_list) {
 
     private var columnCount = 1
     private lateinit var viewModel: MainViewModel
@@ -30,10 +30,30 @@ class ItemFragment : Fragment(R.layout.fragment_item_list) {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                viewModel.allCurrency.observe(viewLifecycleOwner, Observer {
-                    adapter = MyCurrencyRecyclerViewAdapter(it)
-                })
+                val myAdapter = MyCurrencyRecyclerViewAdapter()
+                launch {
+                    viewModel.getOffileData()
+                }
+                when (type) {
+                    0 -> {
+                        viewModel.allCurrency.observe(viewLifecycleOwner, Observer {
+                            it?.let {
+                                myAdapter.setValues(it)
+                                adapter = myAdapter
+                            }
+                        })
+                    }
+                    1 -> {
+                        viewModel.mainCurrencyData.observe(viewLifecycleOwner, Observer {
+                            it?.let {
+                                myAdapter.setValues(it)
+                                adapter = myAdapter
+                            }
+                        })
+                    }
+                }
             }
         }
+
     }
 }

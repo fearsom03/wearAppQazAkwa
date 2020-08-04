@@ -1,17 +1,26 @@
 package kz.evilteamgenius.firstapp.adapter
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import kz.evilteamgenius.firstapp.R
-
 import kz.evilteamgenius.firstapp.models.Currency
 
-class MyCurrencyRecyclerViewAdapter(
-    private val values: List<Currency>
-) : RecyclerView.Adapter<MyCurrencyRecyclerViewAdapter.ViewHolder>() {
+class MyCurrencyRecyclerViewAdapter() :
+    RecyclerView.Adapter<MyCurrencyRecyclerViewAdapter.ViewHolder>() {
+
+    constructor(it: List<Currency>) : this() {
+        values = it
+    }
+
+    private lateinit var values: List<Currency>
+
+    fun setValues(it: List<Currency>) {
+        values = it
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)

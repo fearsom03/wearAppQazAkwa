@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
+        <item name="backgroundColor">@color/backgroundColor</item>
+        <item name="textColor">@color/mainTextColor</item>
+    </style>
+
+
+</resources>

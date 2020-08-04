@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/black"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/AppTheme">
 
     <TextView
         android:id="@+id/item_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:layout_margin="@dimen/text_margin" />
+        android:layout_margin="@dimen/text_margin"
+        android:textColor="@color/mainTextColor"
+        tools:text="@string/a11y_no_data" />
 
     <TextView
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textColor="@color/white"
-        android:text="HELLO"/>
+        android:textColor="@color/subTextColor"
+        tools:text="HELLO" />
 </LinearLayout>
